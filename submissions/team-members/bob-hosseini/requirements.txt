@@ -11,3 +11,4 @@ mlflow
 shap
 xgboost
 plotly
+catboost
