@@ -1203,6 +1203,13 @@ def run_classification_gridsearch_experiment(
     ...     refit_metric="f1_score"
     ... )
     """
+
+    # Detect if we're using DagsHub
+    def is_dagshub_tracking():
+        """Check if current MLflow tracking URI points to DagsHub"""
+        tracking_uri = mlflow.get_tracking_uri()
+        return 'dagshub.com' in tracking_uri.lower()
+    
     grid_search = GridSearchCV(
         estimator=pipeline,        # your Pipeline([... ('classifier', LogisticRegression()) ])
         param_grid=param_grid,
@@ -1216,6 +1223,7 @@ def run_classification_gridsearch_experiment(
     )
 
     print(f"Running grid search for {name}")
+    
     with mlflow.start_run(run_name=name):
         # 1) Log dataset inputs
         mlflow.log_input(dataset["train_ds"], context="training")
@@ -1301,13 +1309,32 @@ def run_classification_gridsearch_experiment(
         )
 
         # 7) Log the best estimator
-        mlflow.sklearn.log_model(
-            sk_model=best_estimator,
-            name=name,
-            registered_model_name=registered_model_name,
-            signature=signature,
-            input_example=example_input
-        )
+        if is_dagshub_tracking():
+            # DagsHub-compatible logging
+            if verbose:
+                print("DagsHub tracking detected - using compatible logging parameters")
+
+            mlflow.sklearn.log_model(
+                best_estimator,
+                artifact_path=registered_model_name,
+                signature=signature,
+                input_example=example_input
+            )
+
+        else:
+            # Standard MLflow logging with full feature set
+            if verbose:
+                print("Local/standard MLflow tracking - using full parameter set")
+
+            mlflow.sklearn.log_model(
+                sk_model=best_estimator,
+                name=name,
+                registered_model_name=registered_model_name,
+                signature=signature,
+                input_example=example_input
+            )
+
+
     if verbose:
         # 3. Print summary in the output cell
         print("Best parameters:", grid_search.best_params_)
@@ -1523,7 +1550,7 @@ def convert_to_multiclass_target(y_series, original_data, target_column='Conflic
 # ====================================================================================================================
 # Create and log ROC curve for binary classification models
 # ====================================================================================================================
-def create_and_log_roc_plot_binary(model, X_test, y_test, prefix="test", show_plot=True):
+def create_and_log_roc_plot_binary(model, X_test, y_test, prefix="test", show_plot=True, mlflow_log=True):
     """
     Create ROC (Receiver Operating Characteristic) curve for binary classification and log to MLflow.
     
@@ -1585,7 +1612,8 @@ def create_and_log_roc_plot_binary(model, X_test, y_test, prefix="test", show_pl
     # Log to MLflow
     roc_path = f"{prefix}_roc_curve.png"
     plt.savefig(roc_path, dpi=150, bbox_inches='tight')
-    mlflow.log_artifact(roc_path)
+    if mlflow_log:
+        mlflow.log_artifact(roc_path)
     
     if show_plot:
         plt.show()

@@ -7,8 +7,11 @@ kagglehub
 scipy
 scikit-learn
 umap-learn
-mlflow
+# mlflow
+mlflow==2.22.0
 shap
 xgboost
 plotly
 catboost
+dotenv
+dagshub
