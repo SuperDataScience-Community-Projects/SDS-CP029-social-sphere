@@ -94,6 +94,8 @@ The **Social Sphere** project investigates how social media habits influence stu
   * GridSearch results with all hyperparameters
 * Utility functions (`utils.py`) automate experiment steps
 
+You can view the online MLflow dashboard hosted on Dagshub [here](https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2).
+
 ### 📉 Feature Selection
 
 * SHAP-guided model trained using only:
