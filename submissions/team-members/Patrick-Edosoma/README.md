@@ -87,9 +87,16 @@ All predictions are probabilistic and should **not** be used as a substitute for
 
 ## 📁 Folder Structure
 
-├── app.py # Streamlit app file
-├── model/ # Trained models (classification/regression)
-├── preprocessor/ # Scaler and PCA transformers
-├── Data/ # Raw and processed datasets
-├── reports/ # Model evaluation reports
-├── README.md # Project documentation
+📁 submissions/
+    └── team-members/
+         └── Patrick-Edosoma/
+             ├── model/
+             │   └── xgboost_classifier_mod.pkl
+             ├── preprocessor/
+             │   └── scaler.joblib
+             ├── Data/
+             │   └── Raw/
+             │       └── Students Social Media Addiction.csv
+             └── Screenshot 2025-07-09 at 21.59.03.png
+📄 app.py
+📄 requirements.txt
