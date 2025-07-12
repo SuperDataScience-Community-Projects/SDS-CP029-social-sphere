@@ -1,5 +1,5 @@
-streamlit==1.26.0
-pandas==2.2.1
+streamlit
+pandas
 scikit-learn
 matplotlib
 seaborn
