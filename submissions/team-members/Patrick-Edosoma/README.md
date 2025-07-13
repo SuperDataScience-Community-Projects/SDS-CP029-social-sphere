@@ -1,4 +1,4 @@
-# 📱 Social Sphere – A Streamlit App for Understanding Student Social Media Behavior
+# 📱 Social Sphere – Student Social-Media Behavior & Relationship Analytics
 
 **Social Sphere** is a machine learning-powered platform that explores how student social media habits relate to academic performance, mental health, sleep, and relationship dynamics. It uses supervised and unsupervised learning models to deliver insightful predictions and segmentations through an interactive web app built with **Streamlit**.
 
@@ -39,17 +39,19 @@
 
 ### 2. ⚠️ Overfitting  
 - **Issue**: High training accuracy with low generalization.  
-- **Solution**: Used PCA, regularization techniques (e.g., Ridge, XGBoost), and cross-validation with adjusted R² scoring.
+- **Solution**: Used PCA and cross-validation with adjusted R² scoring.
 
 ---
 
 ## ✅ Outcomes
 
-- 🔧 Overfitting significantly reduced via PCA and model tuning.
+- 🔧 Overfitting significantly reduced via PCA
 - ✅ Regression and classification models achieved stable performance across folds.
 - 📊 Generated explainable results with **SHAP**.
 - 🧠 Behavioral clusters revealed hidden patterns in sleep and usage behaviors.
 - 💻 Fully functional **Streamlit** app for demo and testing.
+
+ 🔗 [View My App](https://patrick--social-sphere-app-visetttduw5v8fjt7nywcv.streamlit.app)
 
 ---
 
@@ -69,6 +71,49 @@
 
 ---
 
+## 📁 Project Structure
+
+```text
+submissions/
+└── team-members/
+    └── Patrick-Edosoma/
+        ├── data/                                                # All datasets used in the project
+        │   ├── raw/                                            # Original unprocessed dataset
+        │   │   └── Students Social Media Addiction.csv
+        │   ├── classification_processed_data/                  # Cleaned & encoded data for classification
+        │   │   ├── train.csv
+        │   │   └── test.csv
+        │   └── regression_processed_data/                       # Cleaned & encoded data for regression
+        │       ├── train.csv
+        │       └── test.csv
+        │
+        ├── notebook/                                             # All Jupyter notebooks used for exploration & prep
+        │   ├── Classification_feature_engineering.ipynb
+        │   ├── Clustering.ipynb
+        │   ├── Social_Sphere_EDA.ipynb
+        │   ├── feature_importance.ipynb
+        │   └── regression_feature_engineering.ipynb
+        │
+        ├── model/                                                   # Trained ML models (.pkl files)
+        │   ├── random_regressor_model.pkl
+        │   └── xgboost_classifier_mod.pkl
+        │
+        ├── preprocessor/                                             # Fitted preprocessing artifacts
+        │   ├── pca.joblib
+        │   ├── random_forest_scaler.pkl
+        │   └── scaler.joblib
+        │
+        ├── src/                                                          # Custom training scripts
+        │   ├── classification_trainer.py
+        │   └── regression_trainer.py
+        │
+        ├── .gitignore                                                # Git ignored files
+        ├── README.md                                                 # Project overview and documentation
+        ├── Screenshot 2025-07-09 at 21.59.03.png                     # App overview image
+        ├── app.py                                                    # Streamlit app main file
+        └── requirements.txt                                          # Project dependencies
+```
+
 ## 📚 Dataset Citation
 
 **Title**: Social Media Addiction vs Relationships  
@@ -85,18 +130,14 @@ All predictions are probabilistic and should **not** be used as a substitute for
 
 ---
 
-## 📁 Folder Structure
+## 📬 Contact
+Patrick Edosoma
 
-📁 submissions/
-    └── team-members/
-         └── Patrick-Edosoma/
-             ├── model/
-             │   └── xgboost_classifier_mod.pkl
-             ├── preprocessor/
-             │   └── scaler.joblib
-             ├── Data/
-             │   └── Raw/
-             │       └── Students Social Media Addiction.csv
-             └── Screenshot 2025-07-09 at 21.59.03.png
-📄 app.py
-📄 requirements.txt
+Machine Learning Engineer
+
+[Linkedlin](https://www.linkedin.com/in/patrickedosoma/)
+
+## ⭐️ Star This Repo
+
+If you found this project helpful, please star ⭐️ it to show support!
+
