@@ -26,6 +26,7 @@ kagglehub
 # ML Experiment Tracking and Model Management
 # mlflow
 mlflow==2.22.0
+click
 dagshub
 
 # Environment and Configuration
