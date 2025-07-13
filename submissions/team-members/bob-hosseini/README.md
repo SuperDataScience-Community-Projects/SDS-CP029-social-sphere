@@ -4,6 +4,8 @@
 ![MLflow](https://img.shields.io/badge/MLflow-Experiment%20Tracking-orange?logo=mlflow)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML%20Pipeline-blue?logo=scikit-learn)
 ![XGBoost](https://img.shields.io/badge/XGBoost-Gradient%20Boosting-brightgreen?logo=xgboost)
+![CatBoost](https://img.shields.io/badge/CatBoost-Gradient%20Boosting-orange?logo=catboost)
+
 
 Welcome! This repository contains my contribution to the **Social Sphere: Student Social-Media Behavior & Relationship Analytics** project — an open-source initiative by the SuperDataScience community.
 
@@ -11,11 +13,12 @@ Welcome! This repository contains my contribution to the **Social Sphere: Studen
 
 ## 🚀 Project Summary
 
-The **Social Sphere** project investigates how social media habits influence students’ relationships, sleep, and mental health. Our classification models aim to predict social media conflict levels using self-reported survey data from over 700 students across 100+ countries.
+The **Social Sphere** project investigates how social media habits influence students' relationships, sleep, and mental health. Our comprehensive analysis includes both **classification** models to predict social media conflict levels and **regression** models to predict addiction scores using self-reported survey data from over 700 students across 100+ countries.
 
 ### 🔍 Objectives:
 
 * Classify students based on **conflict levels** caused by social media usage
+* Predict **addiction scores** using regression models
 * Compare model performance with and without self-perceived features (like Mental Health)
 * Identify **key behavioral predictors** using SHAP
 * Apply MLOps best practices with **MLflow tracking**
@@ -38,21 +41,46 @@ The **Social Sphere** project investigates how social media habits influence stu
 
 ---
 
+### 📈 **Regression Models (Addiction Score Prediction)**
+
+| Model                | R² Score | RMSE | MAPE | Key Features |
+| -------------------- | -------- | ---- | ---- | ------------ |
+| **Baseline (Dummy)** | 0.00     | 1.38 | 25%  | Mean         |
+| **Linear Reg.**      | 0.93     | 0.32 | 5%   | Mental Health, TikTok, Daily Usage |
+| **Lasso Reg.**       | 0.76     | 0.76 | 9%   | Daily Usage, TikTok, Sleep Hours |
+| **XGBoost**          | 0.87     | 0.57 | 5%   | Sleep Hours, Daily Usage, North America |
+| **CatBoost**         | 0.91     | 0.47 | 4%   | Daily Usage, Sleep Hours, Country |
+
+* **CatBoost** emerges as the top performer with highest R² (0.91) and lowest error metrics
+* **Gradient boosting models** significantly outperform linear approaches
+* **Daily Usage** and **Sleep Hours** consistently rank as top predictors across all models
+
+---
+ 
 ### 🧠 **Feature Importance (SHAP Analysis)**
 
-* **Mental Health**: Strongest predictor; lower scores → higher conflict.
-* **Daily Usage**: Higher usage hours increase conflict probability.
-* **Sleep Hours**: Less sleep correlates with more conflict.
-* **Relationship Status (In Relationship)** and **Country** also have substantial impact in some models.
+* **Mental Health**: Strongest predictor; lower scores → higher conflict/addiction
+* **Daily Usage**: Higher usage hours increase conflict probability and addiction scores
+* **Sleep Hours**: Less sleep correlates with more conflict and higher addiction
+* **TikTok Usage**: Consistently identified as a key predictor across models
+* **Relationship Status (In Relationship)** and **Country** also have substantial impact
 
 ---
 
 ### 🔍 **Model Without Mental Health Feature**
 
+#### Classification Results:
 | Model    | F1-Score | Key Predictors           |
 | -------- | -------- | ------------------------ |
 | XGBoost  | 0.96     | Daily Usage, Sleep Hours |
 | CatBoost | 0.99     | Country, Sleep Hours     |
+
+#### Regression Results:
+| Model    | R² Score | Key Predictors           |
+| -------- | -------- | ------------------------ |
+| Linear   | 0.76     | Daily Usage, Sleep Hours |
+| XGBoost  | 0.87     | Sleep Hours, Daily Usage |
+| CatBoost | 0.91     | Daily Usage, Sleep Hours |
 
 > Removing Mental Health only slightly reduces performance, suggesting strong signals in observable behaviors.
 
@@ -114,13 +142,15 @@ submissions/team-members/bob-hosseini/
 ├── notebooks/
 │   ├── 01_EDA_SocialSphere.ipynb
 │   ├── 02_classification.ipynb
+│   ├── 03_regression.ipynb
 ├── data/
 │   ├── data.csv
 │   ├── cleaned_data.csv
 │   ├── data_cleaned.pickle
 ├── src/
 │   ├── utils.py
-├── mlruns/                         # MLflow tracking directory
+|   |── regression.py
+├── mlruns/                         # (local) MLflow tracking directory
 ├── requirements.txt
 ├── README.md
 ```
@@ -132,6 +162,8 @@ submissions/team-members/bob-hosseini/
 * **Platform Usage Insight**: TikTok and WhatsApp users showed the highest predicted conflict risk.
 * **Cross-Country Analysis**: USA students reported the highest conflict and addiction scores.
 * **Bias Mitigation**: Self-reported Mental Health is a top predictor but not essential for good model performance.
+* **Model Selection**: CatBoost consistently outperforms other models in both classification and regression tasks.
+* **Feature Consistency**: Daily Usage and Sleep Hours emerge as the most reliable behavioral predictors across all models.
 * **SHAP & MLOps**: Combining interpretability with experiment tracking enhanced both transparency and productivity.
 
 ---
