@@ -1,4 +1,5 @@
 import streamlit as st
+import pickle
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,7 +24,8 @@ st.set_page_config(
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("submissions/team-members/aditi-phadnis/Students Social Media Addiction.csv")
+    with open('data/data_cleaned.pickle', 'rb') as f:
+        df = pickle.load(f)
     return df
 
 # Load the data
@@ -52,14 +54,14 @@ with st.sidebar:
         - **Total Records:** {len(df):,}
         - **Features:** {len(df.columns)}
         - **Countries:** {df['Country'].nunique()}
-        - **Platforms:** {df['Most_Used_Platform'].nunique()}
+        - **Platforms:** {df['Platform'].nunique()}
         """
     )
 
     st.markdown("### 🎯 Target Variables")
     st.markdown(
         """
-        - **Conflicts_Over_Social_Media:** Number of conflicts (0-5)
+        - **Conflicts:** Number of conflicts (0-5)
         - **Addicted_Score:** Addiction level (1-10)
         """
     )
@@ -111,7 +113,7 @@ with tab1:
 
     # Single horizontal box plot for all numeric features
     st.subheader("📊 Distribution of Numeric Features")
-    numeric_features = ['Age', 'Avg_Daily_Usage_Hours', 'Sleep_Hours_Per_Night', 'Mental_Health_Score']
+    numeric_features = ['Age', 'Daily_Usage', 'Sleep_Hrs', 'Mental_Health']
 
     # Prepare data in long format for a single box plot
     df_long = df[numeric_features].melt(var_name='Feature', value_name='Value')
@@ -141,7 +143,7 @@ with tab1:
     
     with col2:
         st.subheader("📱 Social Media Platforms")
-        platform_counts = df['Most_Used_Platform'].value_counts()
+        platform_counts = df['Platform'].value_counts()
         fig = px.pie(values=platform_counts.values, names=platform_counts.index, 
                      title="Most Used Platforms")
         st.plotly_chart(fig, use_container_width=True)
@@ -170,7 +172,7 @@ with tab1:
         # st.markdown("**Conflicts Over Social Media**")
         fig_conflicts = px.histogram(
             df, 
-            x='Conflicts_Over_Social_Media', 
+            x='Conflicts', 
             nbins=6,
             title="Conflicts Over Social Media",
             color_discrete_sequence=['blue'],
@@ -214,7 +216,7 @@ with tab1:
 
     # Distribution of conflicts by gender
     st.subheader("📊 Distribution of Conflicts by Gender")
-    fig = px.box(df, x='Gender', y='Conflicts_Over_Social_Media', 
+    fig = px.box(df, x='Gender', y='Conflicts', 
                  title="Conflicts Over Social Media by Gender",
                  color='Gender',
                  color_discrete_sequence=px.colors.qualitative.Set2)
@@ -249,7 +251,7 @@ with tab1:
         st.subheader("🌍 Conflicts by Top Countries")
         top_countries = df['Country'].value_counts().head(11).index
         df_top_countries = df[df['Country'].isin(top_countries)]
-        fig = px.box(df_top_countries, x='Country', y='Conflicts_Over_Social_Media',
+        fig = px.box(df_top_countries, x='Country', y='Conflicts',
                      title="Conflicts by Top Countries",
                      color='Country',
                      color_discrete_sequence=px.colors.qualitative.Dark24)
@@ -258,9 +260,9 @@ with tab1:
     
     with col2:
         st.subheader("📱 Addicted Score by Platform")
-        fig = px.box(df, x='Most_Used_Platform', y='Addicted_Score',
+        fig = px.box(df, x='Platform', y='Addicted_Score',
                      title="Addicted Score by Social Media Platform",
-                     color='Most_Used_Platform',
+                     color='Platform',
                      color_discrete_sequence=px.colors.qualitative.Dark2)
         fig.update_xaxes(tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
@@ -300,15 +302,15 @@ with tab1:
     
     st.markdown("""
     **Key Correlations:**
-    - **Conflicts_Over_Social_Media** and **Addicted_Score** both show strong correlations with several key features:
-        - **Avg_Daily_Usage_Hours**: Positive correlation (higher usage is linked to more conflicts and higher addiction scores)
-        - **Mental_Health_Score**: Negative correlation (lower mental health scores are associated with higher conflicts and addiction)
-        - **Sleep_Hours_Per_Night**: Negative correlation (less sleep is linked to more conflicts and higher addiction)
+    - **Conflicts** and **Addicted_Score** both show strong correlations with several key features:
+        - **Daily_Usage**: Positive correlation (higher usage is linked to more conflicts and higher addiction scores)
+        - **Mental_Health**: Negative correlation (lower mental health scores are associated with higher conflicts and addiction)
+        - **Sleep_Hrs**: Negative correlation (less sleep is linked to more conflicts and higher addiction)
     """)
 
     # Box plot of conflicts based on relationship status
     st.subheader("💕 Conflicts by Relationship Status")
-    fig = px.box(df, x='Relationship_Status', y='Conflicts_Over_Social_Media',
+    fig = px.box(df, x='Relationship_Status', y='Conflicts',
                  title="Conflicts Over Social Media by Relationship Status",
                  color='Relationship_Status',
                  color_discrete_sequence=px.colors.qualitative.Alphabet)
@@ -344,8 +346,8 @@ with tab2:
         df_model['Gender_Encoded'] = le_gender.fit_transform(df_model['Gender'])
         df_model['Academic_Level_Encoded'] = le_academic.fit_transform(df_model['Academic_Level'])
         df_model['Country_Encoded'] = le_country.fit_transform(df_model['Country'])
-        df_model['Most_Used_Platform_Encoded'] = le_platform.fit_transform(df_model['Most_Used_Platform'])
-        df_model['Affects_Academic_Performance_Encoded'] = le_affects.fit_transform(df_model['Affects_Academic_Performance'])
+        df_model['Platform_Encoded'] = le_platform.fit_transform(df_model['Platform'])
+        df_model['Academic_Affects_Encoded'] = le_affects.fit_transform(df_model['Academic_Affects'])
         df_model['Relationship_Status_Encoded'] = le_relationship.fit_transform(df_model['Relationship_Status'])
         
         return df_model, {
@@ -368,12 +370,12 @@ with tab2:
         
         # Feature selection for conflicts prediction
         features_conflicts = ['Age', 'Gender_Encoded', 'Academic_Level_Encoded', 'Country_Encoded',
-                             'Avg_Daily_Usage_Hours', 'Most_Used_Platform_Encoded', 
-                             'Affects_Academic_Performance_Encoded', 'Sleep_Hours_Per_Night',
-                             'Mental_Health_Score', 'Relationship_Status_Encoded']
+                             'Daily_Usage', 'Platform_Encoded', 
+                             'Academic_Affects_Encoded', 'Sleep_Hrs',
+                             'Mental_Health', 'Relationship_Status_Encoded']
         
         X_conflicts = df_model[features_conflicts]
-        y_conflicts = df_model['Conflicts_Over_Social_Media']
+        y_conflicts = df_model['Conflicts']
         
         # Train model
         @st.cache_resource
@@ -396,11 +398,11 @@ with tab2:
             gender = st.selectbox("Gender", options=df['Gender'].unique())
             academic_level = st.selectbox("Academic Level", options=df['Academic_Level'].unique())
             country = st.selectbox("Country", options=df['Country'].unique())
-            avg_daily_usage = st.slider("Average Daily Usage (Hours)", min_value=1.0, max_value=10.0, value=5.0, step=0.1)
+            avg_daily_usage = st.slider("Daily Usage (Hours)", min_value=1.0, max_value=10.0, value=5.0, step=0.1)
         
         with col2:
-            platform = st.selectbox("Most Used Platform", options=df['Most_Used_Platform'].unique())
-            affects_academic = st.selectbox("Affects Academic Performance", options=df['Affects_Academic_Performance'].unique())
+            platform = st.selectbox("Most Used Platform", options=df['Platform'].unique())
+            affects_academic = st.selectbox("Affects Academic Performance", options=df['Academic_Affects'].unique())
             sleep_hours = st.slider("Sleep Hours Per Night", min_value=3.0, max_value=10.0, value=7.0, step=0.1)
             mental_health = st.slider("Mental Health Score", min_value=1, max_value=10, value=7)
             relationship_status = st.selectbox("Relationship Status", options=df['Relationship_Status'].unique())
@@ -443,9 +445,9 @@ with tab2:
         
         # Feature selection for addiction prediction
         features_addiction = ['Age', 'Gender_Encoded', 'Academic_Level_Encoded', 'Country_Encoded',
-                             'Avg_Daily_Usage_Hours', 'Most_Used_Platform_Encoded', 
-                             'Affects_Academic_Performance_Encoded', 'Sleep_Hours_Per_Night',
-                             'Mental_Health_Score', 'Relationship_Status_Encoded', 'Conflicts_Over_Social_Media']
+                             'Daily_Usage', 'Platform_Encoded', 
+                             'Academic_Affects_Encoded', 'Sleep_Hrs',
+                             'Mental_Health', 'Relationship_Status_Encoded', 'Conflicts']
         
         X_addiction = df_model[features_addiction]
         y_addiction = df_model['Addicted_Score']
@@ -471,11 +473,11 @@ with tab2:
             gender = st.selectbox("Gender", options=df['Gender'].unique(), key="addiction_gender")
             academic_level = st.selectbox("Academic Level", options=df['Academic_Level'].unique(), key="addiction_academic")
             country = st.selectbox("Country", options=df['Country'].unique(), key="addiction_country")
-            avg_daily_usage = st.slider("Average Daily Usage (Hours)", min_value=1.0, max_value=10.0, value=5.0, step=0.1, key="addiction_usage")
+            avg_daily_usage = st.slider("Daily Usage (Hours)", min_value=1.0, max_value=10.0, value=5.0, step=0.1, key="addiction_usage")
         
         with col2:
-            platform = st.selectbox("Most Used Platform", options=df['Most_Used_Platform'].unique(), key="addiction_platform")
-            affects_academic = st.selectbox("Affects Academic Performance", options=df['Affects_Academic_Performance'].unique(), key="addiction_affects")
+            platform = st.selectbox("Most Used Platform", options=df['Platform'].unique(), key="addiction_platform")
+            affects_academic = st.selectbox("Affects Academic Performance", options=df['Academic_Affects'].unique(), key="addiction_affects")
             sleep_hours = st.slider("Sleep Hours Per Night", min_value=3.0, max_value=10.0, value=7.0, step=0.1, key="addiction_sleep")
             mental_health = st.slider("Mental Health Score", min_value=1, max_value=10, value=7, key="addiction_mental")
             relationship_status = st.selectbox("Relationship Status", options=df['Relationship_Status'].unique(), key="addiction_relationship")
