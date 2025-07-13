@@ -1340,7 +1340,8 @@ def run_classification_gridsearch_experiment(
 
             mlflow.sklearn.log_model(
                 best_estimator,
-                artifact_path=registered_model_name,
+                artifact_path="model",
+                registered_model_name=registered_model_name,
                 signature=signature,
                 input_example=example_input
             )
