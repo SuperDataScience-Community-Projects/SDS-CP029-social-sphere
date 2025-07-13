@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/588217165645076875/de0af0e4e2ba49d4adcadb4ab08f667d/artifacts
+end_time: 1750745644924
+entry_point_name: ''
+experiment_id: '588217165645076875'
+lifecycle_stage: active
+run_id: de0af0e4e2ba49d4adcadb4ab08f667d
+run_name: logistic_regression
+run_uuid: de0af0e4e2ba49d4adcadb4ab08f667d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750745638735
+status: 3
+tags: []
+user_id: kola_

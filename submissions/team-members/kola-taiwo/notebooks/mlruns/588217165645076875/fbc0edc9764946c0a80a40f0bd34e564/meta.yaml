@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/588217165645076875/fbc0edc9764946c0a80a40f0bd34e564/artifacts
+end_time: 1750743494842
+entry_point_name: ''
+experiment_id: '588217165645076875'
+lifecycle_stage: active
+run_id: fbc0edc9764946c0a80a40f0bd34e564
+run_name: random_forest
+run_uuid: fbc0edc9764946c0a80a40f0bd34e564
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750743485240
+status: 3
+tags: []
+user_id: kola_

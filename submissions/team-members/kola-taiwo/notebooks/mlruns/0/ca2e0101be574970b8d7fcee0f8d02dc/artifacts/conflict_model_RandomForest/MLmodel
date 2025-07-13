@@ -1,0 +1,21 @@
+artifact_path: conflict_model_RandomForest
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.5
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+mlflow_version: 2.22.1
+model_size_bytes: 518686
+model_uuid: 50fbde0e9cdd4a5eaae19acaaad779fa
+prompts: null
+run_id: ca2e0101be574970b8d7fcee0f8d02dc
+utc_time_created: '2025-06-18 05:32:59.622609'

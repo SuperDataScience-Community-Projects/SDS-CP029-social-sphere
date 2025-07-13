@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/816226151951329629/bacfb7fb148b4e368d2f2d8aa7b342db/artifacts
+end_time: 1751559587335
+entry_point_name: ''
+experiment_id: '816226151951329629'
+lifecycle_stage: active
+run_id: bacfb7fb148b4e368d2f2d8aa7b342db
+run_name: kmeans_3
+run_uuid: bacfb7fb148b4e368d2f2d8aa7b342db
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751559582940
+status: 3
+tags: []
+user_id: kola_

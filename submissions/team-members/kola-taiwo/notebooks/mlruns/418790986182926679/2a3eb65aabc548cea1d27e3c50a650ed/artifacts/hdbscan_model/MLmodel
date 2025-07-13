@@ -1,0 +1,17 @@
+artifact_path: hdbscan_model
+flavors:
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+mlflow_version: 2.22.1
+model_size_bytes: 70058
+model_uuid: 6675e2f1ab9c4b328bd1bd74d8b7d484
+prompts: null
+run_id: 2a3eb65aabc548cea1d27e3c50a650ed
+saved_input_example_info:
+  artifact_path: input_example.json
+  serving_input_path: serving_input_example.json
+  type: ndarray
+utc_time_created: '2025-07-03 21:26:39.155403'

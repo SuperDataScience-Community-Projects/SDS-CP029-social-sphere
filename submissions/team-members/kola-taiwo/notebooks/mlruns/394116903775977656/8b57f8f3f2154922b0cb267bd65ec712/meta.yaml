@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/394116903775977656/8b57f8f3f2154922b0cb267bd65ec712/artifacts
+end_time: 1750337481633
+entry_point_name: ''
+experiment_id: '394116903775977656'
+lifecycle_stage: active
+run_id: 8b57f8f3f2154922b0cb267bd65ec712
+run_name: ConflictClassifier
+run_uuid: 8b57f8f3f2154922b0cb267bd65ec712
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750337464207
+status: 3
+tags: []
+user_id: kola_

@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/816226151951329629/478ebb6f8c224a4985e164b5238ce55d/artifacts
+end_time: 1751564458169
+entry_point_name: ''
+experiment_id: '816226151951329629'
+lifecycle_stage: active
+run_id: 478ebb6f8c224a4985e164b5238ce55d
+run_name: hdbscan
+run_uuid: 478ebb6f8c224a4985e164b5238ce55d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751564453212
+status: 3
+tags: []
+user_id: kola_

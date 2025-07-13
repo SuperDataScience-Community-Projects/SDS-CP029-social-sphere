@@ -1,0 +1,5 @@
+         Addiction_Score  Usage_Hours
+Cluster                              
+0               4.674157     3.806367
+1               8.250000     6.413298
+2               6.956000     4.982800

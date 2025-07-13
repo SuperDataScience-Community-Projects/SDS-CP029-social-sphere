@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/588217165645076875/7bb89fc6d0974e809fb80b708115ac29/artifacts
+end_time: 1750715134695
+entry_point_name: ''
+experiment_id: '588217165645076875'
+lifecycle_stage: active
+run_id: 7bb89fc6d0974e809fb80b708115ac29
+run_name: lightgbm
+run_uuid: 7bb89fc6d0974e809fb80b708115ac29
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750715125573
+status: 3
+tags: []
+user_id: kola_

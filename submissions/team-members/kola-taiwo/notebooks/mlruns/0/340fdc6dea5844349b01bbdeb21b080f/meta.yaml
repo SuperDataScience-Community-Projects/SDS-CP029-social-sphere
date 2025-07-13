@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/kola_/Documents/projects/SDS-CP029-social-sphere/submissions/team-members/kola-taiwo/notebooks/mlruns/0/340fdc6dea5844349b01bbdeb21b080f/artifacts
+end_time: 1750224794406
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 340fdc6dea5844349b01bbdeb21b080f
+run_name: Conflict_XGBoost
+run_uuid: 340fdc6dea5844349b01bbdeb21b080f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1750224786761
+status: 3
+tags: []
+user_id: kola_
