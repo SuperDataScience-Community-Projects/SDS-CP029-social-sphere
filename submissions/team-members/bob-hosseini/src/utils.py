@@ -61,6 +61,70 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="shap")
 warnings.filterwarnings("ignore", message=".*NumPy global RNG.*")
 
 
+# ====================================================================================================================
+# MLFLOW EXPERIMENT MANAGEMENT
+# ====================================================================================================================
+
+# ====================================================================================================================
+# Create MLflow dataset objects for experiment tracking and data lineage
+# ====================================================================================================================
+def mlflow_dataset(X_train_full, X_test):
+    """
+    Create MLflow dataset objects for experiment tracking and data lineage.
+    
+    This function creates MLflow dataset objects that can be logged with experiments
+    to track data lineage, ensure reproducibility, and maintain a clear record of
+    which datasets were used for training and testing in each experiment.
+    
+    Parameters:
+    -----------
+    X_train_full : pd.DataFrame
+        Complete training dataset (features only)
+    X_test : pd.DataFrame
+        Test dataset (features only)
+        
+    Returns:
+    --------
+    dict
+        Dictionary containing MLflow dataset objects:
+        - 'train_ds': Training dataset object for MLflow logging
+        - 'test_ds': Test dataset object for MLflow logging
+        
+    Examples:
+    ---------
+    >>> # Create dataset objects for experiment tracking
+    >>> datasets = mlflow_dataset(X_train, X_test)
+    >>> 
+    >>> # Log datasets in an MLflow experiment
+    >>> with mlflow.start_run():
+    ...     mlflow.log_input(datasets['train_ds'], context="training")
+    ...     mlflow.log_input(datasets['test_ds'], context="testing")
+    """
+    train_ds = mlflow.data.from_pandas(
+        df=X_train_full,
+        source="../data/data_cleaned.pickle",
+        name="social_sphere_train_v1"
+    )
+    test_ds = mlflow.data.from_pandas(
+        df=X_test,
+        source="../data/data_cleaned.pickle",
+        name="social_sphere_test_v1"
+    )
+    return {"train_ds": train_ds, "test_ds": test_ds}
+
+# ====================================================================================================================
+# Delete all runs from a specific MLflow experiment
+# ====================================================================================================================
+def quick_delete_experiment(experiment_name):
+    import mlflow
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    if experiment:
+        runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
+        for _, run in runs.iterrows():
+            mlflow.delete_run(run.run_id)
+        print(f"Deleted {len(runs)} runs from '{experiment_name}'")
+    else:
+        print(f"Experiment '{experiment_name}' not found")
 
 # ====================================================================================================================
 # DATA PREPROCESSING FUNCTIONS
@@ -684,57 +748,6 @@ def get_feature_names(column_transformer):
 
 
 # ====================================================================================================================
-# MLFLOW EXPERIMENT MANAGEMENT
-# ====================================================================================================================
-
-# ====================================================================================================================
-# Create MLflow dataset objects for experiment tracking and data lineage
-# ====================================================================================================================
-def mlflow_dataset(X_train_full, X_test):
-    """
-    Create MLflow dataset objects for experiment tracking and data lineage.
-    
-    This function creates MLflow dataset objects that can be logged with experiments
-    to track data lineage, ensure reproducibility, and maintain a clear record of
-    which datasets were used for training and testing in each experiment.
-    
-    Parameters:
-    -----------
-    X_train_full : pd.DataFrame
-        Complete training dataset (features only)
-    X_test : pd.DataFrame
-        Test dataset (features only)
-        
-    Returns:
-    --------
-    dict
-        Dictionary containing MLflow dataset objects:
-        - 'train_ds': Training dataset object for MLflow logging
-        - 'test_ds': Test dataset object for MLflow logging
-        
-    Examples:
-    ---------
-    >>> # Create dataset objects for experiment tracking
-    >>> datasets = mlflow_dataset(X_train, X_test)
-    >>> 
-    >>> # Log datasets in an MLflow experiment
-    >>> with mlflow.start_run():
-    ...     mlflow.log_input(datasets['train_ds'], context="training")
-    ...     mlflow.log_input(datasets['test_ds'], context="testing")
-    """
-    train_ds = mlflow.data.from_pandas(
-        df=X_train_full,
-        source="../data/data_cleaned.pickle",
-        name="social_sphere_train_v1"
-    )
-    test_ds = mlflow.data.from_pandas(
-        df=X_test,
-        source="../data/data_cleaned.pickle",
-        name="social_sphere_test_v1"
-    )
-    return {"train_ds": train_ds, "test_ds": test_ds}
-
-# ====================================================================================================================
 # Run a basic classification experiment with cross-validation and MLflow tracking
 # ====================================================================================================================
 def run_classification_experiment(
@@ -870,7 +883,9 @@ def run_shap_experiment(
     random_state = 42,
     feature_perturbation="interventional",
     plot_type="bar",
-    shap_type="linear"
+    shap_type="linear",
+    model_type="classification",
+    figsize=(10, 6)
 ):
     """
     Generate SHAP (SHapley Additive exPlanations) plots for model interpretability.
@@ -904,7 +919,10 @@ def run_shap_experiment(
         Type of SHAP explainer to use. Options:
         - "linear": For linear models (LogisticRegression, LinearSVC, etc.)
         - "tree": For tree-based models (RandomForest, XGBoost, CatBoost, etc.)
-        
+    model_type : str, default="classification"
+        Type of model to use. Options:
+        - "classification": For classification models (LogisticRegression, RandomForest, XGBoost, etc.)
+        - "regression": For regression models (LinearRegression, RandomForest, XGBoost, etc.)
     Returns:
     --------
     matplotlib.figure.Figure
@@ -947,7 +965,8 @@ def run_shap_experiment(
     # 1. Extract best model and its preprocessing step
     # best_model = grid_search_result.best_estimator_
     preprocessor = best_model.named_steps['preprocessing']
-    classifier   = best_model.named_steps['classifier']
+    model_step_name = 'classifier' if model_type == 'classification' else 'regressor'
+    model   = best_model.named_steps[model_step_name]
 
     # 2. Prepare data for SHAP
     #    Use a subset of training data (or validation) for faster computation
@@ -961,33 +980,38 @@ def run_shap_experiment(
     feature_names = get_feature_names(preprocessor)
     X_shap_df = pd.DataFrame(X_shap_proc, columns=feature_names)
 
+    model_name = type(model).__name__
+    print(f"Model name: {model_name}")
     if shap_type == "linear":    
         # Initialize a SHAP explainer
         explainer = shap.LinearExplainer(
-            model=classifier,
+            model=model,
             masker=X_shap_df,
             feature_perturbation=feature_perturbation   # supported: "interventional" or "correlation_dependent"
         )
     else:
         # Check if this is CatBoost and adjust parameters accordingly
-        classifier_name = type(classifier).__name__
+        # model_name = type(model).__name__
         
-        if 'CatBoost' in classifier_name:
-            # CatBoost requires special handling
+        if 'CatBoost' in model_name:            
+            feature_perturbation="tree_path_dependent"  # Required for CatBoost with categorical features                
+            plot_type = "bar"            
             explainer = shap.TreeExplainer(
-                model=classifier,
-                feature_perturbation="tree_path_dependent"  # Required for CatBoost with categorical features
-            )
-            plot_type = "bar"
+                model=model,                
+                feature_perturbation=feature_perturbation
+            )   
+
             print(f"CatBoost SHAP plot type: {plot_type}")
         else:
             # XGBoost, RandomForest, etc.
+            print(f"Tree SHAP plot type: {plot_type}")
+
             explainer = shap.TreeExplainer(
-                model=classifier,
+                model=model,
                 data=X_shap_df,
                 feature_perturbation=feature_perturbation
             )
-
+    
     # Compute SHAP values
     shap_values = explainer.shap_values(X_shap_df)
     
@@ -1000,11 +1024,11 @@ def run_shap_experiment(
         shap_values_plot = shap_values
 
     # Summary plot
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=figsize)
     shap.summary_plot(
         shap_values_plot, X_shap_df, plot_type=plot_type, show=False, max_display=15
     )
-    plt.title("SHAP Summary Plot")
+    plt.title(f"SHAP Summary Plot - model: {model_name}")
     fig_sum = plt.gcf()
     plt.close(fig_sum)
     return fig_sum
@@ -1328,7 +1352,7 @@ def run_classification_gridsearch_experiment(
 
             mlflow.sklearn.log_model(
                 sk_model=best_estimator,
-                name=name,
+                artifact_path="model",
                 registered_model_name=registered_model_name,
                 signature=signature,
                 input_example=example_input

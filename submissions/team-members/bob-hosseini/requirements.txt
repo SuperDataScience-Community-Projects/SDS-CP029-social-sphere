@@ -1,17 +1,33 @@
+# Jupyter and Development Environment
 ipykernel
 notebook
+
+# Data Manipulation and Analysis
 pandas
+scipy
+
+# Machine Learning Libraries
+scikit-learn
+xgboost
+catboost
+shap
+
+# Visualization Libraries
 matplotlib
 seaborn
-kagglehub
-scipy
-scikit-learn
+plotly
+
+# Dimensionality Reduction
 umap-learn
+
+# Data Sources
+kagglehub
+
+# ML Experiment Tracking and Model Management
 # mlflow
 mlflow==2.22.0
-shap
-xgboost
-plotly
-catboost
-dotenv
+click
 dagshub
+
+# Environment and Configuration
+dotenv
