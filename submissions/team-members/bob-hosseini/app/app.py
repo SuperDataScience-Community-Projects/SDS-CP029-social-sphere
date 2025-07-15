@@ -48,17 +48,17 @@ def main():
         st.session_state.active_tab = 0
     
     # Create tabs with session state tracking
-    tab_names = ["📊 Exploratory Data Analysis (EDA)", "🔮 Prediction Models"]
+    tab_names = ["📊 Exploratory Data Analysis (EDA)", "🔮 Predicting Conflicts & Addiction"]
     
     # Use columns to create a custom tab selector that preserves state
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        if st.button("📊 EDA", type="secondary" if st.session_state.active_tab != 0 else "primary"):
+        if st.button(tab_names[0], type="secondary" if st.session_state.active_tab != 0 else "primary"):
             st.session_state.active_tab = 0
     
     with col2:
-        if st.button("🔮 Predictions", type="secondary" if st.session_state.active_tab != 1 else "primary"):
+        if st.button(tab_names[1], type="secondary" if st.session_state.active_tab != 1 else "primary"):
             st.session_state.active_tab = 1
     
     # Render content based on active tab

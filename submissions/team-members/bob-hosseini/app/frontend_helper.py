@@ -21,6 +21,7 @@ import os
 # Add the src directory to the path (relative to the app directory)
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 import regression
+import utils  # Add this import
 
 warnings.filterwarnings('ignore')
 
@@ -72,21 +73,19 @@ class SocialSphereUI:
             st.markdown(
                 """
                 **Pre-trained Models:**
-                - **Conflicts:** CatBoost Multiclass Classifier
+                - **Conflicts:** CatBoost Binary Classifier
                 - **Addiction:** CatBoost Regressor with Rounding
                 
-                Models include full preprocessing pipelines - no manual encoding required!
+                Models include full preprocessing pipelines - no manual encoding required!   
+                [MLflow Experiments and Models](https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D)
                 """
             )
+            # st.markdown("[View MLflow Experiments and Models](https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D)")
+
 
             st.markdown("### 📁 Dataset Source")
-            st.markdown(
-                """
-                Student Social Media Addiction Dataset  
-                Contains comprehensive data on social media usage patterns, 
-                academic performance, and mental health metrics.
-                """
-            )
+            st.markdown("[Social Media Addiction vs Relationships Dataset](https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships)")
+
     
     def render_eda_tab(self):
         """Render the Exploratory Data Analysis tab"""
@@ -510,12 +509,13 @@ class PredictionUI:
             platform = st.selectbox("Most Used Platform", options=self.df['Platform'].unique())
             affects_academic = st.selectbox("Affects Academic Performance", options=self.df['Academic_Affects'].unique())
             sleep_hours = st.slider("Sleep Hours Per Night", min_value=3.0, max_value=10.0, value=7.0, step=0.1)
-            mental_health = st.slider("Mental Health Score", min_value=1, max_value=10, value=7)
+            # mental_health = st.slider("Mental Health Score", min_value=1, max_value=10, value=7)
             relationship_status = st.selectbox("Relationship Status", options=self.df['Relationship_Status'].unique())
         
         # Make predictions
         if st.button("🔮 Get Complete Prediction", type="primary"):
             # First predict conflicts (needed for addiction prediction)
+            mental_health = 0 # just a dummy value for now
             conflicts_input_df = self._create_conflicts_input_df(
                 age, gender, academic_level, country, avg_daily_usage, 
                 platform, affects_academic, sleep_hours, mental_health, relationship_status
@@ -560,21 +560,24 @@ class PredictionUI:
             
             # SHAP explanations
             st.markdown("## 🔍 AI Model Explanations")
-            st.markdown("Understanding which factors influenced your predictions:")
+            st.markdown("""
+            Understanding which factors influenced your predictions:
+            - **Bar length** shows the magnitude of feature impact on the prediction
+            """)
             
             shap_col1, shap_col2 = st.columns(2)
             
             with shap_col1:
                 st.markdown("### 💥 Conflicts Model Explanation")
                 if conflicts_model_sklearn is not None:
-                    self._render_shap_explanation(conflicts_model_sklearn, conflicts_input_df, "Conflicts")
+                    self._render_shap_explanation(conflicts_model_sklearn, conflicts_input_df, "classification")
                 else:
                     st.warning("⚠️ Conflicts SHAP explanation not available")
             
             with shap_col2:
                 st.markdown("### 🎮 Addiction Model Explanation")
                 if addiction_model_sklearn is not None:
-                    self._render_shap_explanation(addiction_model_sklearn, addiction_input_df, "Addiction")
+                    self._render_shap_explanation(addiction_model_sklearn, addiction_input_df, "regression")
                 else:
                     st.warning("⚠️ Addiction SHAP explanation not available")
     
@@ -617,67 +620,78 @@ class PredictionUI:
         """Display conflicts prediction result"""
         if isinstance(conflict_value, np.ndarray):
             conflict_value = conflict_value.item()
-        st.success(f"🎯 **Predicted Conflicts:** {conflict_value:.1f}")
+        conflict_class = "Low" if conflict_value == 1 else "High"
+        st.success(f"🎯 **Predicted Conflict Class:** {conflict_class}")
         
-        # Conflict level interpretation
-        if conflict_value < 2:
-            conflict_level = "Low"
-            color = "green"
-        elif conflict_value < 4:
-            conflict_level = "Moderate"
-            color = "orange"
-        else:
-            conflict_level = "High"
-            color = "red"
+        # # Conflict level interpretation
+        # if conflict_value < 2:
+        #     conflict_level = "Low"
+        #     color = "green"
+        # elif conflict_value < 4:
+        #     conflict_level = "Moderate"
+        #     color = "orange"
+        # else:
+        #     conflict_level = "High"
+        #     color = "red"
         
-        st.markdown(f"**Conflict Level:** :{color}[{conflict_level}]")
+        # st.markdown(f"**Conflict Level:** :{color}[{conflict_level}]")
     
     def _display_addiction_result(self, addiction_value):
         """Display addiction prediction result"""
         if isinstance(addiction_value, np.ndarray):
             addiction_value = addiction_value.item()
-        st.success(f"🎯 **Predicted Addiction Score:** {addiction_value:.1f}/10")
         
         # Addiction level interpretation
-        if addiction_value < 3:
-            addiction_level = "Low"
-            color = "green"
-        elif addiction_value < 6:
-            addiction_level = "Moderate"
-            color = "orange"
-        else:
-            addiction_level = "High"
-            color = "red"
-        
-        st.markdown(f"**Addiction Level:** :{color}[{addiction_level}]")
+        addiction_level = "Low" if addiction_value < 3 else "Moderate" if addiction_value < 6 else "High"
+        st.success(f"🎯 **Predicted Addiction Score:** {addiction_value:.1f}/10 ({addiction_level})")
+        # st.markdown(f"**Addiction Level:** :{color}[{addiction_level}]")
     
-    def _render_shap_explanation(self, model_sklearn, sample, model_type):
-        """Render SHAP explanation"""
+    def _render_shap_explanation(self, model_sklearn, sample, model_type, shap_type = "tree", plot_type = "bar"):
+        """Render SHAP explanation using run_shap_experiment from utils.py"""
         if model_sklearn is not None:
             try:
-                # Create a simple SHAP explanation
-                explainer = shap.TreeExplainer(model_sklearn)
-                shap_values = explainer.shap_values(sample)
+                # Use the run_shap_experiment function from utils.py
+                # For CatBoost models, we need specific parameters
+                model_name = type(model_sklearn.named_steps.get('classifier', model_sklearn.named_steps.get('regressor'))).__name__
                 
-                # Create the plot
-                plt.figure(figsize=(10, 6))
-                shap.summary_plot(shap_values, sample, plot_type="bar", show=False)
-                plt.title(f"SHAP Feature Importance for {model_type} Prediction")
-                fig_shap = plt.gcf()
-                plt.close(fig_shap)
+                # Determine appropriate parameters based on model type
+                # if 'CatBoost' in model_name:
+                    # feature_perturbation = "tree_path_dependent"  # Required for CatBoost with categorical features
+                    # shap_type = "tree"
+                    # plot_type = "bar"  # CatBoost works best with bar plots
+                # else:
+                    # feature_perturbation = "interventional"
+                # shap_type = "tree"  # Assuming tree-based models, adjust if needed
+                # plot_type = "bar"
                 
-                st.subheader("🔍 SHAP Feature Importance")
+                # Determine model type for utils function
+                # utils_model_type = "classification" if model_type == "Conflicts" else "regression"
+                # if "Addiction" in model_type:
+                #     utils_model_type = "regression"  # Addiction score is regression
+                
+                # Create SHAP explanation using the utils function
+                fig_shap = utils.run_shap_experiment(
+                    best_model=model_sklearn,
+                    X_train_full=sample,
+                    # random_state=42,
+                    # feature_perturbation=feature_perturbation,
+                    plot_type=plot_type,
+                    shap_type=shap_type,
+                    model_type=model_type,
+                    figsize=(10, 6)
+                )
+                
+                # st.subheader("🔍 SHAP Feature Importance")
                 st.pyplot(fig_shap, use_container_width=True)
                 
-                st.markdown("""
-                **SHAP Explanation:**
-                - **Red bars** indicate features that increase the prediction
-                - **Blue bars** indicate features that decrease the prediction
-                - **Bar length** shows the magnitude of feature impact
-                """)
+                # st.markdown("""
+                # **SHAP Explanation:**
+                # - **Bar length** shows the magnitude of feature impact on the prediction
+                # """)
                 
             except Exception as e:
                 st.error(f"Error generating SHAP plot: {e}")
+                st.error("Please ensure the model pipeline contains the expected named steps.")
         else:
             st.warning("⚠️ SHAP visualization requires sklearn models. Please ensure models are loaded correctly.")
     
@@ -688,12 +702,7 @@ class PredictionUI:
         **MLflow Models Used:**
         - **Conflicts Prediction:** `conflict_catboost_multiclass` (CatBoost Classifier)
         - **Addiction Score Prediction:** `addicted_score_catboost_all_features+rounded` (CatBoost Regressor)
-        
-        **Prediction Pipeline:**
-        1. **Step 1:** Predict conflicts based on user profile
-        2. **Step 2:** Use predicted conflicts + profile to predict addiction score
-        3. **Step 3:** Automatically generate SHAP explanations for both models
-        
-        These models are loaded directly from the MLflow model registry and include all necessary preprocessing steps.
-        No manual feature engineering or encoding is required - just provide the raw input values!
+                
+        - Models are loaded directly from the MLflow model registry
+        - They include all necessary preprocessing steps.
         """) 
