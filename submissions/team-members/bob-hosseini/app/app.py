@@ -4,27 +4,42 @@ import pandas as pd
 import numpy as np
 import warnings
 import logging
+import sys
+import os
+
+# Add the src directory to the path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+from config_loader import get_config
 
 # Import frontend helper
 from frontend_helper import SocialSphereUI, PredictionUI
 
-warnings.filterwarnings('ignore')
+# Load configuration
+config = get_config()
+
+# Configure warnings and logging based on config
+app_config = config.get_app_config()
+if app_config.get('suppress_warnings', True):
+    warnings.filterwarnings('ignore')
 
 # Suppress MLflow warnings about version mismatches
 logging.getLogger("mlflow").setLevel(logging.ERROR)
 logging.getLogger("sklearn").setLevel(logging.ERROR)
 
-# Set page config
+# Set page config from configuration
+ui_config = config.get_ui_config()
 st.set_page_config(
-    page_title="SocialSphere Analytics",
-    layout="wide",
-    initial_sidebar_state="auto"
+    page_title=ui_config.get('page_title', "SocialSphere Analytics"),
+    layout=ui_config.get('layout', "wide"),
+    initial_sidebar_state=ui_config.get('sidebar_state', "auto")
 )
 
 # Load data
 @st.cache_data
 def load_data():
-    with open('data/data_cleaned.pickle', 'rb') as f:
+    data_config = config.get_data_config()
+    data_path = data_config.get('local_path', 'data/data_cleaned.pickle')
+    with open(data_path, 'rb') as f:
         df = pickle.load(f)
     return df
 

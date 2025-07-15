@@ -964,13 +964,29 @@ def run_shap_experiment(
     """
     # 1. Extract best model and its preprocessing step
     # best_model = grid_search_result.best_estimator_
+
+    # Extract inner regressor if it exists
+    if model_type != "classification":
+        regressor = best_model.named_steps['regressor']
+        if type(regressor).__name__ == 'RoundingRegressor':
+            inner_pipeline = Pipeline([
+                ('preprocessing', best_model.named_steps['preprocessing']),
+                ('regressor', best_model.named_steps['regressor'].regressor)  # Extract inner regressor
+            ])
+        else:
+            inner_pipeline = best_model
+        best_model = inner_pipeline
+
     preprocessor = best_model.named_steps['preprocessing']
     model_step_name = 'classifier' if model_type == 'classification' else 'regressor'
     model   = best_model.named_steps[model_step_name]
 
     # 2. Prepare data for SHAP
     #    Use a subset of training data (or validation) for faster computation
-    X_shap_raw = X_train_full.sample(n=200, random_state=random_state)
+    if len(X_train_full) > 200:
+        X_shap_raw = X_train_full.sample(n=200, random_state=random_state)
+    else:
+        X_shap_raw = X_train_full
     # Transform to model inputs
     X_shap_proc = preprocessor.transform(X_shap_raw)
     if sparse.issparse(X_shap_proc):

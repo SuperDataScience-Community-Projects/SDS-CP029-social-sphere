@@ -22,8 +22,12 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 import regression
 import utils  # Add this import
+from config_loader import get_config
 
 warnings.filterwarnings('ignore')
+
+# Load configuration
+config = get_config()
 
 
 class SocialSphereUI:
@@ -70,21 +74,34 @@ class SocialSphereUI:
             )
 
             st.markdown("### 🤖 MLflow Models")
+            
+            # Get model configurations
+            conflicts_config = config.get_model_config('conflicts')
+            addiction_config = config.get_model_config('addiction')
+            
             st.markdown(
-                """
+                f"""
                 **Pre-trained Models:**
-                - **Conflicts:** CatBoost Binary Classifier
-                - **Addiction:** CatBoost Regressor with Rounding
+                - **Conflicts:** {conflicts_config.get('name', 'CatBoost Binary Classifier')}
+                - **Addiction:** {addiction_config.get('name', 'CatBoost Regressor with Rounding')}
                 
-                Models include full preprocessing pipelines - no manual encoding required!   
-                [MLflow Experiments and Models](https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D)
+                Models include full preprocessing pipelines - no manual encoding required!
                 """
             )
-            # st.markdown("[View MLflow Experiments and Models](https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D)")
-
+            
+            # Add MLflow dashboard link from config
+            mlflow_config = config.get_mlflow_config()
+            experiment_url = mlflow_config.get('experiment_url')
+            if experiment_url:
+                st.markdown(f"[View MLflow Experiments and Models]({experiment_url})")
 
             st.markdown("### 📁 Dataset Source")
-            st.markdown("[Social Media Addiction vs Relationships Dataset](https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships)")
+            
+            # Add data source link from config
+            data_config = config.get_data_config()
+            source_url = data_config.get('source_url')
+            if source_url:
+                st.markdown(f"[Social Media Addiction vs Relationships Dataset]({source_url})")
 
     
     def render_eda_tab(self):
@@ -364,8 +381,11 @@ class ModelManager:
     def load_conflicts_model():
         """Load the conflicts classification model from MLflow registry"""
         try:
-            logged_model = 'runs:/a7f3a1fd156443e58e7554ac1e8b53fa/model'
-            model = mlflow.pyfunc.load_model(logged_model)
+            conflicts_config = config.get_model_config('conflicts')
+            model_uri = conflicts_config.get('pyfunc_uri')
+            if not model_uri:
+                raise ValueError("Conflicts model URI not found in configuration")
+            model = mlflow.pyfunc.load_model(model_uri)
             return model
         except Exception as e:
             st.error(f"Error loading conflicts model: {e}")
@@ -376,7 +396,11 @@ class ModelManager:
     def load_addiction_model():
         """Load the addiction score regression model from MLflow registry"""
         try:
-            model = mlflow.pyfunc.load_model("runs:/594b916daee046ff8f9fa0ed3aed8748/model")
+            addiction_config = config.get_model_config('addiction')
+            model_uri = addiction_config.get('pyfunc_uri')
+            if not model_uri:
+                raise ValueError("Addiction model URI not found in configuration")
+            model = mlflow.pyfunc.load_model(model_uri)
             return model
         except Exception as e:
            st.error(f"Error loading addiction model: {e}")
@@ -387,7 +411,10 @@ class ModelManager:
     def load_conflicts_model_sklearn():
         """Load the conflicts classification model as sklearn pipeline for SHAP"""
         try:
-            model_uri = "runs:/a7f3a1fd156443e58e7554ac1e8b53fa/model"
+            conflicts_config = config.get_model_config('conflicts')
+            model_uri = conflicts_config.get('pyfunc_uri')
+            if not model_uri:
+                raise ValueError("Conflicts sklearn model URI not found in configuration")
             pipe = mlflow.sklearn.load_model(model_uri)
             return pipe
         except Exception as e:
@@ -399,7 +426,10 @@ class ModelManager:
     def load_addiction_model_sklearn():
         """Load the addiction score regression model as sklearn pipeline for SHAP"""
         try:
-            model_uri = "runs:/594b916daee046ff8f9fa0ed3aed8748/model"
+            addiction_config = config.get_model_config('addiction')
+            model_uri = addiction_config.get('pyfunc_uri')
+            if not model_uri:
+                raise ValueError("Addiction sklearn model URI not found in configuration")
             pipe = mlflow.sklearn.load_model(model_uri)
             return pipe
         except Exception as e:
@@ -620,7 +650,7 @@ class PredictionUI:
         """Display conflicts prediction result"""
         if isinstance(conflict_value, np.ndarray):
             conflict_value = conflict_value.item()
-        conflict_class = "Low" if conflict_value == 1 else "High"
+        conflict_class = "Low" if conflict_value == 0 else "High"
         st.success(f"🎯 **Predicted Conflict Class:** {conflict_class}")
         
         # # Conflict level interpretation
@@ -646,48 +676,36 @@ class PredictionUI:
         st.success(f"🎯 **Predicted Addiction Score:** {addiction_value:.1f}/10 ({addiction_level})")
         # st.markdown(f"**Addiction Level:** :{color}[{addiction_level}]")
     
-    def _render_shap_explanation(self, model_sklearn, sample, model_type, shap_type = "tree", plot_type = "bar"):
+    def _render_shap_explanation(self, model_sklearn, sample, model_type, shap_type=None, plot_type=None):
         """Render SHAP explanation using run_shap_experiment from utils.py"""
         if model_sklearn is not None:
             try:
-                # Use the run_shap_experiment function from utils.py
-                # For CatBoost models, we need specific parameters
-                model_name = type(model_sklearn.named_steps.get('classifier', model_sklearn.named_steps.get('regressor'))).__name__
+                # Get SHAP configuration
+                shap_config = config.get_shap_config()
+                app_config = config.get_app_config()
                 
-                # Determine appropriate parameters based on model type
-                # if 'CatBoost' in model_name:
-                    # feature_perturbation = "tree_path_dependent"  # Required for CatBoost with categorical features
-                    # shap_type = "tree"
-                    # plot_type = "bar"  # CatBoost works best with bar plots
-                # else:
-                    # feature_perturbation = "interventional"
-                # shap_type = "tree"  # Assuming tree-based models, adjust if needed
-                # plot_type = "bar"
+                # Use provided parameters or defaults from config
+                if shap_type is None:
+                    shap_type = shap_config.get('default_shap_type', 'tree')
+                if plot_type is None:
+                    plot_type = shap_config.get('default_plot_type', 'bar')
                 
-                # Determine model type for utils function
-                # utils_model_type = "classification" if model_type == "Conflicts" else "regression"
-                # if "Addiction" in model_type:
-                #     utils_model_type = "regression"  # Addiction score is regression
+                # Get figure size from config
+                fig_width = shap_config.get('figure_size', {}).get('width', 10)
+                fig_height = shap_config.get('figure_size', {}).get('height', 6)
                 
                 # Create SHAP explanation using the utils function
                 fig_shap = utils.run_shap_experiment(
                     best_model=model_sklearn,
                     X_train_full=sample,
-                    # random_state=42,
-                    # feature_perturbation=feature_perturbation,
+                    random_state=app_config.get('random_state', 42),
                     plot_type=plot_type,
                     shap_type=shap_type,
                     model_type=model_type,
-                    figsize=(10, 6)
+                    figsize=(fig_width, fig_height)
                 )
                 
-                # st.subheader("🔍 SHAP Feature Importance")
                 st.pyplot(fig_shap, use_container_width=True)
-                
-                # st.markdown("""
-                # **SHAP Explanation:**
-                # - **Bar length** shows the magnitude of feature impact on the prediction
-                # """)
                 
             except Exception as e:
                 st.error(f"Error generating SHAP plot: {e}")
