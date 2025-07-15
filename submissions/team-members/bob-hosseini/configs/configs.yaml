@@ -1,0 +1,60 @@
+# SocialSphere Analytics Configuration File
+# This file contains all configurable parameters for the application
+
+# MLflow Model Configuration
+models:
+  conflicts:
+    pyfunc_uri: "runs:/3edb39904209419ab4d30ea0a00b79f1/model"
+    # sklearn_uri: "runs:/a7f3a1fd156443e58e7554ac1e8b53fa/model"
+    type: "classification"
+    name: "CatBoost Binary Classifier"
+    description: "Predicts social media conflicts (binary classification)"
+  
+  addiction:
+    pyfunc_uri: "runs:/594b916daee046ff8f9fa0ed3aed8748/model"
+    # sklearn_uri: "runs:/594b916daee046ff8f9fa0ed3aed8748/model"
+    type: "regression"
+    name: "CatBoost Regressor"
+    description: "Predicts addiction score (regression with rounding)"
+
+# Data Configuration
+data:
+  source_url: "https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships"
+  local_path: "data/data_cleaned.pickle"
+  target_columns:
+    - "Social_Media_Conflicts"
+    - "Addicted_Score"
+
+# MLflow Configuration
+mlflow:
+  tracking_uri: "https://dagshub.com/bab-git/SDS-social-sphere.mlflow"
+  experiment_url: "https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D"
+  
+# SHAP Configuration
+shap:
+  default_plot_type: "bar"
+  default_shap_type: "tree"
+  max_display_features: 15
+  figure_size:
+    width: 10
+    height: 6
+  catboost_params:
+    feature_perturbation: "tree_path_dependent"
+    plot_type: "bar"
+
+# UI Configuration
+ui:
+  page_title: "SocialSphere Analytics"
+  layout: "wide"
+  sidebar_state: "auto"
+  theme:
+    primary_color: "#FF6B6B"
+    background_color: "#FFFFFF"
+    secondary_background_color: "#F0F2F6"
+
+# App Settings
+app:
+  random_state: 42
+  max_training_samples_for_shap: 200
+  cache_models: true
+  suppress_warnings: true

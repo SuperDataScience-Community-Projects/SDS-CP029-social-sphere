@@ -376,35 +376,35 @@ class SocialSphereUI:
 class ModelManager:
     """Manages MLflow model loading and caching"""
     
-    @staticmethod
-    @st.cache_resource
-    def load_conflicts_model():
-        """Load the conflicts classification model from MLflow registry"""
-        try:
-            conflicts_config = config.get_model_config('conflicts')
-            model_uri = conflicts_config.get('pyfunc_uri')
-            if not model_uri:
-                raise ValueError("Conflicts model URI not found in configuration")
-            model = mlflow.pyfunc.load_model(model_uri)
-            return model
-        except Exception as e:
-            st.error(f"Error loading conflicts model: {e}")
-            return None
+    # @staticmethod
+    # @st.cache_resource
+    # def load_conflicts_model():
+    #     """Load the conflicts classification model from MLflow registry"""
+    #     try:
+    #         conflicts_config = config.get_model_config('conflicts')
+    #         model_uri = conflicts_config.get('pyfunc_uri')
+    #         if not model_uri:
+    #             raise ValueError("Conflicts model URI not found in configuration")
+    #         model = mlflow.pyfunc.load_model(model_uri)
+    #         return model
+    #     except Exception as e:
+    #         st.error(f"Error loading conflicts model: {e}")
+    #         return None
 
-    @staticmethod
-    @st.cache_resource
-    def load_addiction_model():
-        """Load the addiction score regression model from MLflow registry"""
-        try:
-            addiction_config = config.get_model_config('addiction')
-            model_uri = addiction_config.get('pyfunc_uri')
-            if not model_uri:
-                raise ValueError("Addiction model URI not found in configuration")
-            model = mlflow.pyfunc.load_model(model_uri)
-            return model
-        except Exception as e:
-           st.error(f"Error loading addiction model: {e}")
-           return None
+    # @staticmethod
+    # @st.cache_resource
+    # def load_addiction_model():
+    #     """Load the addiction score regression model from MLflow registry"""
+    #     try:
+    #         addiction_config = config.get_model_config('addiction')
+    #         model_uri = addiction_config.get('pyfunc_uri')
+    #         if not model_uri:
+    #             raise ValueError("Addiction model URI not found in configuration")
+    #         model = mlflow.pyfunc.load_model(model_uri)
+    #         return model
+    #     except Exception as e:
+    #        st.error(f"Error loading addiction model: {e}")
+    #        return None
 
     @staticmethod
     @st.cache_resource
@@ -449,56 +449,43 @@ class PredictionUI:
         st.header("🔮 Prediction Models")
         
         # Load models
-        conflicts_model = self.model_manager.load_conflicts_model()
-        addiction_model = self.model_manager.load_addiction_model()
+        # conflicts_model = self.model_manager.load_conflicts_model()
+        # addiction_model = self.model_manager.load_addiction_model()
         conflicts_model_sklearn = self.model_manager.load_conflicts_model_sklearn()
         addiction_model_sklearn = self.model_manager.load_addiction_model_sklearn()
         
         # Display model loading status
-        self._render_model_status(conflicts_model, conflicts_model_sklearn, 
-                                addiction_model, addiction_model_sklearn)
+        self._render_model_status(conflicts_model_sklearn, 
+                                addiction_model_sklearn)
         
-        if conflicts_model is None and addiction_model is None:
+        if conflicts_model_sklearn is None and addiction_model_sklearn is None:
             self._render_model_error()
             return
         
         # Single combined prediction interface
-        self._render_combined_prediction(conflicts_model, conflicts_model_sklearn,
-                                       addiction_model, addiction_model_sklearn)
+        self._render_combined_prediction(conflicts_model_sklearn,
+                                       addiction_model_sklearn)
         
         # Model information
         self._render_model_info()
     
-    def _render_model_status(self, conflicts_model, conflicts_model_sklearn, 
-                           addiction_model, addiction_model_sklearn):
+    def _render_model_status(self, conflicts_model_sklearn, addiction_model_sklearn):
         """Render model loading status"""
         st.markdown("### 🔧 Model Status")
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
 
         with col1:
-            if conflicts_model is not None:
-                st.success("✅ Conflicts PyFunc: Loaded")
-            else:
-                st.error("❌ Conflicts PyFunc: Failed")
-
-        with col2:
             if conflicts_model_sklearn is not None:
                 st.success("✅ Conflicts Sklearn: Loaded")
             else:
                 st.error("❌ Conflicts Sklearn: Failed")
 
-        with col3:
-            if addiction_model is not None:
-                st.success("✅ Addiction PyFunc: Loaded")
-            else:
-                st.error("❌ Addiction PyFunc: Failed")
-
-        with col4:
+        with col2:
             if addiction_model_sklearn is not None:
                 st.success("✅ Addiction Sklearn: Loaded")
             else:
                 st.error("❌ Addiction Sklearn: Failed")
-    
+
     def _render_model_error(self):
         """Render model loading error"""
         st.error("""
@@ -517,8 +504,7 @@ class PredictionUI:
     
 
     
-    def _render_combined_prediction(self, conflicts_model, conflicts_model_sklearn,
-                                  addiction_model, addiction_model_sklearn):
+    def _render_combined_prediction(self, conflicts_model_sklearn, addiction_model_sklearn):
         """Render combined prediction interface for both conflicts and addiction"""
         st.subheader("🔮 Predict Social Media Impact")
         st.markdown("Get predictions for both **conflicts** and **addiction score** based on your profile.")
@@ -532,7 +518,11 @@ class PredictionUI:
             age = st.slider("Age", min_value=16, max_value=30, value=20)
             gender = st.selectbox("Gender", options=self.df['Gender'].unique())
             academic_level = st.selectbox("Academic Level", options=self.df['Academic_Level'].unique())
-            country = st.selectbox("Country", options=self.df['Country'].unique())
+            country = st.selectbox(
+                "Country",
+                options=sorted(self.df['Country'].unique()),
+                index=sorted(self.df['Country'].unique()).index('USA') if 'USA' in self.df['Country'].unique() else 0
+            )
             avg_daily_usage = st.slider("Daily Usage (Hours)", min_value=1.0, max_value=10.0, value=5.0, step=0.1)
         
         with col2:
@@ -550,8 +540,8 @@ class PredictionUI:
         )
         
         # Get conflicts prediction
-        if conflicts_model is not None:
-            conflicts_pred = conflicts_model.predict(conflicts_input_df)[0]
+        if conflicts_model_sklearn is not None:
+            conflicts_pred = conflicts_model_sklearn.predict(conflicts_input_df)[0]
             if isinstance(conflicts_pred, np.ndarray):
                 conflicts_pred = conflicts_pred.item()
         else:
@@ -573,15 +563,15 @@ class PredictionUI:
         
         with result_col1:
             st.markdown("### 💥 Conflicts Prediction")
-            if conflicts_model is not None:
+            if conflicts_model_sklearn is not None:
                 self._display_conflicts_result(conflicts_pred)
             else:
                 st.error("❌ Conflicts model not available")
         
         with result_col2:
             st.markdown("### 🎮 Addiction Score Prediction")
-            if addiction_model is not None:
-                addiction_pred = addiction_model.predict(addiction_input_df)[0]
+            if addiction_model_sklearn is not None:
+                addiction_pred = addiction_model_sklearn.predict(addiction_input_df)[0]
                 self._display_addiction_result(addiction_pred)
             else:
                 st.error("❌ Addiction model not available")
