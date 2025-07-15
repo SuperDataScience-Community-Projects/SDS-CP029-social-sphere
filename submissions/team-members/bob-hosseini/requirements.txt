@@ -34,3 +34,4 @@ dagshub
 
 # Environment and Configuration
 dotenv
+PyYAML

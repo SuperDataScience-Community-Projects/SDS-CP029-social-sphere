@@ -539,77 +539,75 @@ class PredictionUI:
             platform = st.selectbox("Most Used Platform", options=self.df['Platform'].unique())
             affects_academic = st.selectbox("Affects Academic Performance", options=self.df['Academic_Affects'].unique())
             sleep_hours = st.slider("Sleep Hours Per Night", min_value=3.0, max_value=10.0, value=7.0, step=0.1)
-            # mental_health = st.slider("Mental Health Score", min_value=1, max_value=10, value=7)
             relationship_status = st.selectbox("Relationship Status", options=self.df['Relationship_Status'].unique())
         
-        # Make predictions
-        if st.button("🔮 Get Complete Prediction", type="primary"):
-            # First predict conflicts (needed for addiction prediction)
-            mental_health = 0 # just a dummy value for now
-            conflicts_input_df = self._create_conflicts_input_df(
-                age, gender, academic_level, country, avg_daily_usage, 
-                platform, affects_academic, sleep_hours, mental_health, relationship_status
-            )
-            
-            # Get conflicts prediction
+        # Automatically make predictions (no button needed)
+        # First predict conflicts (needed for addiction prediction)
+        mental_health = 0 # just a dummy value for now
+        conflicts_input_df = self._create_conflicts_input_df(
+            age, gender, academic_level, country, avg_daily_usage, 
+            platform, affects_academic, sleep_hours, mental_health, relationship_status
+        )
+        
+        # Get conflicts prediction
+        if conflicts_model is not None:
+            conflicts_pred = conflicts_model.predict(conflicts_input_df)[0]
+            if isinstance(conflicts_pred, np.ndarray):
+                conflicts_pred = conflicts_pred.item()
+        else:
+            st.warning("⚠️ Conflicts model not available, using default value (3) for addiction prediction")
+            conflicts_pred = 3
+        
+        # Create addiction input with predicted conflicts
+        addiction_input_df = self._create_addiction_input_df(
+            age, gender, academic_level, country, avg_daily_usage, 
+            platform, affects_academic, sleep_hours, mental_health, 
+            relationship_status, conflicts_pred
+        )
+        
+        # Display results
+        st.markdown("## 🎯 Prediction Results")
+        
+        # Results in columns
+        result_col1, result_col2 = st.columns(2)
+        
+        with result_col1:
+            st.markdown("### 💥 Conflicts Prediction")
             if conflicts_model is not None:
-                conflicts_pred = conflicts_model.predict(conflicts_input_df)[0]
-                if isinstance(conflicts_pred, np.ndarray):
-                    conflicts_pred = conflicts_pred.item()
+                self._display_conflicts_result(conflicts_pred)
             else:
-                st.warning("⚠️ Conflicts model not available, using default value (3) for addiction prediction")
-                conflicts_pred = 3
-            
-            # Create addiction input with predicted conflicts
-            addiction_input_df = self._create_addiction_input_df(
-                age, gender, academic_level, country, avg_daily_usage, 
-                platform, affects_academic, sleep_hours, mental_health, 
-                relationship_status, conflicts_pred
-            )
-            
-            # Display results
-            st.markdown("## 🎯 Prediction Results")
-            
-            # Results in columns
-            result_col1, result_col2 = st.columns(2)
-            
-            with result_col1:
-                st.markdown("### 💥 Conflicts Prediction")
-                if conflicts_model is not None:
-                    self._display_conflicts_result(conflicts_pred)
-                else:
-                    st.error("❌ Conflicts model not available")
-            
-            with result_col2:
-                st.markdown("### 🎮 Addiction Score Prediction")
-                if addiction_model is not None:
-                    addiction_pred = addiction_model.predict(addiction_input_df)[0]
-                    self._display_addiction_result(addiction_pred)
-                else:
-                    st.error("❌ Addiction model not available")
-            
-            # SHAP explanations
-            st.markdown("## 🔍 AI Model Explanations")
-            st.markdown("""
-            Understanding which factors influenced your predictions:
-            - **Bar length** shows the magnitude of feature impact on the prediction
-            """)
-            
-            shap_col1, shap_col2 = st.columns(2)
-            
-            with shap_col1:
-                st.markdown("### 💥 Conflicts Model Explanation")
-                if conflicts_model_sklearn is not None:
-                    self._render_shap_explanation(conflicts_model_sklearn, conflicts_input_df, "classification")
-                else:
-                    st.warning("⚠️ Conflicts SHAP explanation not available")
-            
-            with shap_col2:
-                st.markdown("### 🎮 Addiction Model Explanation")
-                if addiction_model_sklearn is not None:
-                    self._render_shap_explanation(addiction_model_sklearn, addiction_input_df, "regression")
-                else:
-                    st.warning("⚠️ Addiction SHAP explanation not available")
+                st.error("❌ Conflicts model not available")
+        
+        with result_col2:
+            st.markdown("### 🎮 Addiction Score Prediction")
+            if addiction_model is not None:
+                addiction_pred = addiction_model.predict(addiction_input_df)[0]
+                self._display_addiction_result(addiction_pred)
+            else:
+                st.error("❌ Addiction model not available")
+        
+        # SHAP explanations
+        st.markdown("## 🔍 AI Model Explanations")
+        st.markdown("""
+        Understanding which factors influenced your predictions:
+        - **Bar length** shows the magnitude of feature impact on the prediction
+        """)
+        
+        shap_col1, shap_col2 = st.columns(2)
+        
+        with shap_col1:
+            st.markdown("### 💥 Conflicts Model Explanation")
+            if conflicts_model_sklearn is not None:
+                self._render_shap_explanation(conflicts_model_sklearn, conflicts_input_df, "classification")
+            else:
+                st.warning("⚠️ Conflicts SHAP explanation not available")
+        
+        with shap_col2:
+            st.markdown("### 🎮 Addiction Model Explanation")
+            if addiction_model_sklearn is not None:
+                self._render_shap_explanation(addiction_model_sklearn, addiction_input_df, "regression")
+            else:
+                st.warning("⚠️ Addiction SHAP explanation not available")
     
     def _create_conflicts_input_df(self, age, gender, academic_level, country, 
                                  avg_daily_usage, platform, affects_academic, 
