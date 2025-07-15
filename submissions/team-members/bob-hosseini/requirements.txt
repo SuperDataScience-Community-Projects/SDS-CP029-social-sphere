@@ -17,6 +17,9 @@ matplotlib
 seaborn
 plotly
 
+# Streamlit App Framework
+streamlit
+
 # Dimensionality Reduction
 umap-learn
 
