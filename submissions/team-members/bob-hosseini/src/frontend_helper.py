@@ -423,8 +423,10 @@ class PredictionUI:
         st.write("Using machine learning models to predict social media conflicts and addiction scores.")
 
         mlflow_config = config.get_mlflow_config()
-        DAGSHUB_REPO = mlflow_config.get('DAGSHUB_REPO')
-        setup_mlflow(DAGSHUB_REPO)
+        tracking_uri = mlflow_config.get('tracking_uri')
+        mlflow.set_tracking_uri(tracking_uri)
+        # DAGSHUB_REPO = mlflow_config.get('DAGSHUB_REPO')
+        # setup_mlflow(DAGSHUB_REPO)
         
         # Load models
         # conflicts_model = self.model_manager.load_conflicts_model()
