@@ -22,15 +22,18 @@ image = (
         "scikit-learn>=1.7.0",
         "Pillow>=10.0.0",
         "mlflow==2.22.0",
-        "PyYAML",
+        "shap==0.48.0",
+        "catboost==1.2.8",
+        "xgboost==3.0.2",
+        "PyYAML==6.0.2",
         )
     .add_local_file(
         streamlit_script_local_path,
         streamlit_script_remote_path,
     )
+    .add_local_dir(project_root / "configs", "/root/configs")
     .add_local_dir(project_root / "src", "/root/src")
     .add_local_dir(project_root / "data", "/root/data")
-    # .add_local_dir(project_root / "models", "/root/models")
     .add_local_dir(project_root / ".streamlit", "/root/.streamlit")
     .add_local_file(project_root / "image.jpg", "/root/image.jpg")
 )

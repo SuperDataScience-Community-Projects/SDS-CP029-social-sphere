@@ -1,12 +1,12 @@
 import streamlit as st
 import pickle
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 import warnings
 import logging
 import sys
 import os
-from PIL import Image
+# from PIL import Image
 
 # Add the src directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
