@@ -1,0 +1,10 @@
+streamlit
+pandas
+scikit-learn
+matplotlib
+seaborn
+xgboost
+catboost
+shap
+mlflow
+dagshub

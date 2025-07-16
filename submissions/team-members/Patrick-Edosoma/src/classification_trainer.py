@@ -5,6 +5,7 @@
 import os
 import pandas as pd
 import numpy as np
+import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
@@ -108,5 +109,16 @@ for model_name, model in models.items():
         with open(report_path, "w") as f:
             f.write(text_report)
         mlflow.log_artifact(report_path)
+        
+model_dir = os.path.join(base_dir, "model")
+filename = model_name.replace(" ", "_") + ".pkl"
+joblib.dump(model, os.path.join(model_dir, filename))
 
+# Create output directory if it doesn't exist
+preprocessor_dir = os.path.join(base_dir, "preprocessor")
+os.makedirs(preprocessor_dir, exist_ok=True)
+
+# Save scaler and PCA
+joblib.dump(scaler, os.path.join(preprocessor_dir, "scaler.joblib"))
+joblib.dump(pca, os.path.join(preprocessor_dir, "pca.joblib"))
         
