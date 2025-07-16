@@ -101,7 +101,12 @@ class SocialSphereUI:
             data_config = config.get_data_config()
             source_url = data_config.get('source_url')
             if source_url:
-                st.markdown(f"[Social Media Addiction vs Relationships Dataset]({source_url})")
+                st.markdown(f"[Students' Social Media Addiction Dataset]({source_url})")
+
+            st.markdown("### 🗂️ GitHub Repository")
+            st.markdown(
+                "[View on GitHub](https://github.com/SuperDataScience-Community-Projects/SDS-CP029-social-sphere/tree/main/submissions/team-members/bob-hosseini)"
+            )
 
     
     def render_eda_tab(self):
