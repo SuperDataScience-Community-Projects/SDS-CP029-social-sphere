@@ -23,6 +23,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 # import regression
 import utils  # Add this import
 from config_loader import get_config
+from mlflow_config import setup_mlflow
 
 warnings.filterwarnings('ignore')
 
@@ -420,6 +421,10 @@ class PredictionUI:
         """Render the prediction tab"""
         st.header("🔮 Prediction Models")
         st.write("Using machine learning models to predict social media conflicts and addiction scores.")
+
+        mlflow_config = config.get_mlflow_config()
+        DAGSHUB_REPO = mlflow_config.get('DAGSHUB_REPO')
+        setup_mlflow(DAGSHUB_REPO)
         
         # Load models
         # conflicts_model = self.model_manager.load_conflicts_model()

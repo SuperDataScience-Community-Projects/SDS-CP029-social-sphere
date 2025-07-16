@@ -28,6 +28,7 @@ data:
 # MLflow Configuration
 mlflow:
   tracking_uri: "https://dagshub.com/bab-git/SDS-social-sphere.mlflow"
+  DAGSHUB_REPO: "SDS-social-sphere"
   experiment_url: "https://dagshub.com/bab-git/SDS-social-sphere.mlflow/#/experiments/2?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D"
   
 # SHAP Configuration
