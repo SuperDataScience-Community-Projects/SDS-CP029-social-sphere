@@ -1,0 +1,37 @@
+# Jupyter and Development Environment
+ipykernel
+notebook
+
+# Data Manipulation and Analysis
+pandas
+scipy
+
+# Machine Learning Libraries
+scikit-learn
+xgboost
+catboost
+shap
+
+# Visualization Libraries
+matplotlib
+seaborn
+plotly
+
+# Streamlit App Framework
+streamlit
+
+# Dimensionality Reduction
+umap-learn
+
+# Data Sources
+kagglehub
+
+# ML Experiment Tracking and Model Management
+# mlflow
+mlflow==2.22.0
+click
+dagshub
+
+# Environment and Configuration
+dotenv
+PyYAML
