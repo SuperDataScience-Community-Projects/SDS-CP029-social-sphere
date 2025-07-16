@@ -33,7 +33,7 @@ image = (
     )
     .add_local_dir(project_root / "configs", "/root/configs")
     .add_local_dir(project_root / "src", "/root/src")
-    .add_local_dir(project_root / "data", "/root/data")
+    .add_local_file(project_root / "data/data_cleaned.pickle", "/root/data/data_cleaned.pickle")
     .add_local_dir(project_root / ".streamlit", "/root/.streamlit")
     .add_local_file(project_root / "image.jpg", "/root/image.jpg")
 )

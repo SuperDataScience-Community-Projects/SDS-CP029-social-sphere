@@ -23,7 +23,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 # import regression
 import utils  # Add this import
 from config_loader import get_config
-from mlflow_config import setup_mlflow
+# from mlflow_config import setup_mlflow
 
 warnings.filterwarnings('ignore')
 
@@ -53,7 +53,7 @@ class SocialSphereUI:
                 Ideal for researchers and educators to gain insights into social media challenges.
                 """
             )
-
+            st.divider()  # ✨ Clean horizontal line separator
             st.markdown("### 📊 Dataset Summary")
             st.markdown(
                 f"""
@@ -63,7 +63,8 @@ class SocialSphereUI:
                 - **Platforms:** {self.df['Platform'].nunique()}
                 """
             )
-
+            
+            st.divider()  # ✨ Clean horizontal line separator
             st.markdown("### 🎯 Target Variables")
             st.markdown(
                 """
@@ -72,6 +73,7 @@ class SocialSphereUI:
                 """
             )
 
+            st.divider()  # ✨ Clean horizontal line separator
             st.markdown("### 🤖 MLflow Models")
             
             # Get model configurations
@@ -93,6 +95,7 @@ class SocialSphereUI:
             if experiment_url:
                 st.markdown(f"[View MLflow Experiments and Models]({experiment_url})")
 
+            st.divider()  # ✨ Clean horizontal line separator
             st.markdown("### 📁 Dataset Source")
             
             # Add data source link from config
@@ -101,6 +104,7 @@ class SocialSphereUI:
             if source_url:
                 st.markdown(f"[Students' Social Media Addiction Dataset]({source_url})")
 
+            st.divider()  # ✨ Clean horizontal line separator
             st.markdown("### 🗂️ GitHub Repository")
             st.markdown(
                 "[View on GitHub](https://github.com/SuperDataScience-Community-Projects/SDS-CP029-social-sphere/tree/main/submissions/team-members/bob-hosseini)"

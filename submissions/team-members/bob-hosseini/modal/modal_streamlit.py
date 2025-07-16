@@ -156,28 +156,6 @@ def main():
     st.title("📱 SocialSphere Analytics:")
     st.title("Social Media Conflicts & Addiction Prediction")
     
-    # st.write(
-    #     "This application provides comprehensive analysis of social media usage patterns, "
-    #     "conflicts, and addiction scores among students. Explore the data through **EDA** "
-    #     "or make **predictions** using advanced machine learning models."
-    # )
-
-    # ====================================
-    # Sidebar information
-    # ====================================
-    # st.sidebar.header("App Description")
-    # st.sidebar.write(
-    #     "**SocialSphere Analytics** uses advanced machine learning to analyze social media behavior patterns. "
-    #     "The system provides insights into student social media usage, conflict detection, and addiction prediction. "
-    #     "Navigate between EDA and prediction modes to explore different aspects of the data."
-    # )
-    
-    # Show deployment mode
-    # deployment_mode = os.getenv("DEPLOYMENT_MODE", "modal")
-    # deployment_emoji = "☁️" if deployment_mode == "modal" else "🏠"
-    # st.sidebar.info(
-    #     f"{deployment_emoji} **Deployment Mode:** {deployment_mode.title()}"
-    # )
 
     # ====================================
     # Check debug mode
