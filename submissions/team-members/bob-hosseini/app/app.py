@@ -10,6 +10,9 @@ import os
 
 # Add the src directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+BASE_DIR = os.path.dirname(__file__)  # wherever app.py lives
+DATA_PATH = os.path.join(BASE_DIR, "..", "data", "data_cleaned.pickle")
+
 from config_loader import get_config
 
 # Import frontend helper
@@ -37,17 +40,15 @@ st.set_page_config(
 
 # Load data
 @st.cache_data
-def load_data():
-    data_config = config.get_data_config()
-    data_path = data_config.get('local_path', 'data/data_cleaned.pickle')
-    with open(data_path, 'rb') as f:
+def load_data(path):
+    with open(path, 'rb') as f:
         df = pickle.load(f)
     return df
 
 def main():
     """Main application function"""
     # Load the data
-    df = load_data()
+    df = load_data(DATA_PATH)
     
     # Initialize UI components
     ui = SocialSphereUI(df)
