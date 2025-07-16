@@ -375,36 +375,6 @@ class SocialSphereUI:
 
 class ModelManager:
     """Manages MLflow model loading and caching"""
-    
-    # @staticmethod
-    # @st.cache_resource
-    # def load_conflicts_model():
-    #     """Load the conflicts classification model from MLflow registry"""
-    #     try:
-    #         conflicts_config = config.get_model_config('conflicts')
-    #         model_uri = conflicts_config.get('pyfunc_uri')
-    #         if not model_uri:
-    #             raise ValueError("Conflicts model URI not found in configuration")
-    #         model = mlflow.pyfunc.load_model(model_uri)
-    #         return model
-    #     except Exception as e:
-    #         st.error(f"Error loading conflicts model: {e}")
-    #         return None
-
-    # @staticmethod
-    # @st.cache_resource
-    # def load_addiction_model():
-    #     """Load the addiction score regression model from MLflow registry"""
-    #     try:
-    #         addiction_config = config.get_model_config('addiction')
-    #         model_uri = addiction_config.get('pyfunc_uri')
-    #         if not model_uri:
-    #             raise ValueError("Addiction model URI not found in configuration")
-    #         model = mlflow.pyfunc.load_model(model_uri)
-    #         return model
-    #     except Exception as e:
-    #        st.error(f"Error loading addiction model: {e}")
-    #        return None
 
     @staticmethod
     @st.cache_resource
@@ -501,8 +471,6 @@ class PredictionUI:
         - `addicted_score_catboost_all_features+rounded`
         """)
         st.stop()
-    
-
     
     def _render_combined_prediction(self, conflicts_model_sklearn, addiction_model_sklearn):
         """Render combined prediction interface for both conflicts and addiction"""
@@ -641,18 +609,6 @@ class PredictionUI:
         conflict_class = "Low" if conflict_value == 0 else "High"
         st.success(f"🎯 **Predicted Conflict Class:** {conflict_class}")
         
-        # # Conflict level interpretation
-        # if conflict_value < 2:
-        #     conflict_level = "Low"
-        #     color = "green"
-        # elif conflict_value < 4:
-        #     conflict_level = "Moderate"
-        #     color = "orange"
-        # else:
-        #     conflict_level = "High"
-        #     color = "red"
-        
-        # st.markdown(f"**Conflict Level:** :{color}[{conflict_level}]")
     
     def _display_addiction_result(self, addiction_value):
         """Display addiction prediction result"""
@@ -670,7 +626,7 @@ class PredictionUI:
             try:
                 # Get SHAP configuration
                 shap_config = config.get_shap_config()
-                app_config = config.get_app_config()
+                # app_config = config.get_app_config()
                 
                 # Use provided parameters or defaults from config
                 if shap_type is None:
@@ -686,7 +642,7 @@ class PredictionUI:
                 fig_shap = utils.run_shap_experiment(
                     best_model=model_sklearn,
                     X_train_full=sample,
-                    random_state=app_config.get('random_state', 42),
+                    # random_state=app_config.get('random_state', 42),
                     plot_type=plot_type,
                     shap_type=shap_type,
                     model_type=model_type,
