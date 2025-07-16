@@ -6,6 +6,7 @@ import warnings
 import logging
 import sys
 import os
+from PIL import Image
 
 # Add the src directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -55,8 +56,16 @@ def main():
     # Render sidebar
     ui.render_sidebar()
     
+    # Display header image
+    image_path = os.path.join(os.path.dirname(__file__), '..', 'image.jpg')
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        # Display small centered image
+        st.image(image_path, width=800)
+
     # Main title
-    st.title("📱 SocialSphere Analytics: Social Media Conflicts & Addiction Prediction")
+    st.title("📱 SocialSphere Analytics:")
+    st.title("Social Media Conflicts & Addiction Prediction")
     
     # Initialize session state for tab selection
     if 'active_tab' not in st.session_state:
