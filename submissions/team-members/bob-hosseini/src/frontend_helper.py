@@ -110,6 +110,15 @@ class SocialSphereUI:
                 "[View on GitHub](https://github.com/SuperDataScience-Community-Projects/SDS-CP029-social-sphere/tree/main/submissions/team-members/bob-hosseini)"
             )
 
+            st.divider()
+            st.markdown("### 👤 Author")
+            st.markdown(
+                """
+                **Developed by:** [Bob Hosseini](https://bob-hosseini-portfolio.web.app/)  
+                [LinkedIn](https://www.linkedin.com/in/bhosseini/) 
+                """
+            )
+
     
     def render_eda_tab(self):
         """Render the Exploratory Data Analysis tab"""
